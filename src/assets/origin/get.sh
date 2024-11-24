@@ -29,5 +29,11 @@ main(){
       -O ./keycdn.ico
   wget "https://www.netlify.com/favicon.ico" \
       -O ./netlify.ico
+  wget "https://cloud.tencent.com/favicon.ico" \
+      -O ./tencentcloud.ico
+  wget "https://img.alicdn.com/tfs/TB13DzOjXP7gK0jSZFjXXc5aXXa-212-48.png" \
+      -O ./alibabacloud.png
+  wget "https://portal.volccdn.com/obj/volcfe/logo/appbar_logo_light.2.svg" \
+      -O ./bytedance-cloud.ico
 }
 main

@@ -1,6 +1,6 @@
 import {onMessage, sendMessage} from 'webext-bridge/background'
 import type {Tabs, WebRequest} from 'webextension-polyfill'
-import {level1, noone} from './rules'
+import {type1, noone} from './rules'
 // only on dev mode
 if (import.meta.hot) {
   // @ts-expect-error for background HMR
@@ -41,7 +41,7 @@ const onCompletedFunc = (details: WebRequest.OnCompletedDetailsType) => {
     case 'main_frame': {
       console.log(hostname);
       let flag = false;
-      for (const company of level1) {
+      for (const company of type1) {
         if (company.detect(details)) {
           const pop = company.pop(details);
           const shortPop = company.shortPop(pop);

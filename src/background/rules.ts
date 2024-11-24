@@ -1,15 +1,15 @@
 import {WebRequest} from "webextension-polyfill";
-import cloudflare32 from "~/assets/level1/cloudflare-32.png";
-import fastly32 from "~/assets/level1/fastly-32.png";
-import cloudfront32 from "~/assets/level1/cloudfront-32.png";
-import bunnycdn32 from "~/assets/level1/bunnycdn-32.png";
-import akamai32 from "~/assets/level1/akamai-32.png";
-import cdn77_32 from "~/assets/level1/cdn77-32.png";
-import keycdn32 from "~/assets/level1/keycdn-32.png";
-import netlify32 from "~/assets/level1/netlify-32.png";
-import ghPages from "~/assets/level1/github-32.png";
+import cloudflare32 from "~/assets/type1/cloudflare-32.png";
+import fastly32 from "~/assets/type1/fastly-32.png";
+import cloudfront32 from "~/assets/type1/cloudfront-32.png";
+import bunnycdn32 from "~/assets/type1/bunnycdn-32.png";
+import akamai32 from "~/assets/type1/akamai-32.png";
+import cdn77_32 from "~/assets/type1/cdn77-32.png";
+import keycdn32 from "~/assets/type1/keycdn-32.png";
+import netlify32 from "~/assets/type1/netlify-32.png";
+import ghPages from "~/assets/type1/github-32.png";
 // TODO, level2 judge by HTTPS-DNS CName detect
-import no_gray from "~/assets/level1/cdn-gray-32.png";
+import no_gray from "~/assets/type1/cdn-gray-32.png";
 
 interface cdncompany {
   detect(details: WebRequest.OnCompletedDetailsType): boolean;
@@ -22,6 +22,25 @@ interface cdncompany {
 
   name(): string;
 }
+
+const none: cdncompany = {
+  detect: (details) => {
+    return false;
+  },
+  pop: (details) => {
+    return "DETECT";
+  },
+  shortPop(pop: string): string {
+    return "NO";
+  },
+  icon: () => {
+    return no_gray;
+  },
+  name: () => {
+    return "NO";
+  }
+}
+export const noone = none;
 
 const getHeader = (request: WebRequest.OnCompletedDetailsType, needle: string) => {
   console.log('rr headers ', request.responseHeaders);
@@ -60,7 +79,6 @@ const cloudflare: cdncompany = {
     return "Cloudflare";
   }
 }
-
 const fastlyRegex: RegExp = /^[Ss]\d+\.\d+,[Vv][Ss]\d+,[Vv][Ee]\d+$/;
 const fastly: cdncompany = {
   detect: (details) => {
@@ -270,28 +288,111 @@ const githubPages: cdncompany = {
     return "GitHub-Pages";
   }
 }
-
-const none: cdncompany = {
-  detect: (details) => {
+const isIPv6 = (address: string) => {
+  try {
+    const url = new URL(`http://[${address}]`);
+    return url.hostname === address;
+  } catch (e) {
     return false;
-  },
-  pop: (details) => {
-    return "DETECT";
-  },
-  shortPop(pop: string): string {
-    return "NO";
-  },
-  icon: () => {
-    return no_gray;
-  },
-  name: () => {
-    return "NO";
   }
 }
-export const noone = none;
-export const level1 = [
+
+import alibaba32 from "~/assets/type1/alibaba-cloud-32.png";
+
+const alibaba_const: any = {
+  via_regex: /v?cache[0-9]{1,3}\.[a-zA-Z0-9]{4,10}\[[^\]]+]/,
+}
+
+// TODO, 需要靠HTTPS-DNS/firefox DNS 补全
+const alibaba: cdncompany = {
+  detect: (details) => {
+    const server = getHeader(details, "server");
+    const viaList = getHeader(details, "via")?.split(", ") ?? [];
+    const allMatch = viaList.every((cache) => {
+      return alibaba_const.via_regex.test(cache) || isIPv6(cache);
+    });
+    const xCdnProvider = getHeader(details, "x-cdn-provider");
+    return ((server === "Tengine") &&
+        (viaList.length > 0 && allMatch)) ||
+      (xCdnProvider === "alibaba")
+      ;
+  },
+  pop: (details) => {
+    const xCache = getHeader(details, "X-Cache");
+    console.log(`alibaba x-cache ${xCache}`);
+    return "?";
+  },
+  shortPop(pop: string): string {
+    return "?";
+  },
+  icon: () => {
+    return alibaba32;
+  },
+  name: () => {
+    return "Alibaba";
+  }
+}
+
+import tencent32 from "~/assets/type1/tencent-cloud-32.png";
+// TODO, 需要靠HTTPS-DNS/firefox DNS 补全
+const tencent: cdncompany = {
+  detect: (details) => {
+    const server = getHeader(details, "server");
+    const xCdnProvider = getHeader(details, "x-cdn-provider");
+    return (server?.startsWith("tencent") ?? false) // 会有人不套CDN吗?
+      || (xCdnProvider === "tencent");
+  },
+  pop: (details) => {
+    return "?";
+  },
+  shortPop(pop: string): string {
+    return "?";
+  },
+  icon: () => {
+    return tencent32;
+  },
+  name: () => {
+    return "Tencent";
+  }
+}
+
+import bytedance32 from "~/assets/type1/bytedance-cloud-32.png";
+
+const bytedance_const: any = {
+  via_regex: /v?cache[0-9]{1,3}\.[a-zA-Z0-9]{2,10}/,
+}
+
+const bytedance: cdncompany = {
+  detect: (details) => {
+    const server = getHeader(details, "server");
+    const via = getHeader(details, "via");
+    const viaList = via?.split(", ") ?? [];
+    const allMatch = viaList.every(vi => {
+      return bytedance_const.via_regex.test(vi);
+    });
+    return (server === "Byte-nginx") && allMatch;
+  },
+  pop: (details) => {
+    const via = getHeader(details, "via");
+    const viaList = via?.split(", ") ?? [];
+    const pop = viaList?.at(0)?.split(".")[1] ?? "?";
+    return pop;
+  },
+  shortPop(pop: string): string {
+    return pop.slice(0, 4);
+  },
+  icon: () => {
+    return bytedance32;
+  },
+  name: () => {
+    return "Bytedance";
+  }
+}
+
+export const type1 = [
   cloudflarePages, githubPages,
   cloudflare, fastly, cloudfront,
   bunny, akamai, cdn77, keycdn,
-  netlifyCDN
+  netlifyCDN,
+  bytedance, alibaba, tencent // BAT
 ];
