@@ -1,6 +1,9 @@
 import {onMessage, sendMessage} from 'webext-bridge/background'
 import type {Tabs, WebRequest} from 'webextension-polyfill'
 import {type1, noone} from './rules'
+import {isFirefox} from '~/env'
+import {ColorValue} from "webextension-polyfill/namespaces/action";
+
 // only on dev mode
 if (import.meta.hot) {
   // @ts-expect-error for background HMR
@@ -10,7 +13,7 @@ if (import.meta.hot) {
 }
 
 // remove or turn this off if you don't use side panel
-const USE_SIDE_PANEL = true
+const USE_SIDE_PANEL = true && (!isFirefox);
 
 // to toggle the sidepanel with the action button in chromium:
 if (USE_SIDE_PANEL) {
@@ -64,6 +67,12 @@ const onCompletedFunc = (details: WebRequest.OnCompletedDetailsType) => {
             return browser.action.setTitle({
               tabId: tabId,
               title: `${name} ${pop}`,
+            });
+          }).then(() => {
+            console.log(`set badge color`);
+            return browser.action.setBadgeBackgroundColor({
+              tabId: tabId,
+              color: "rgba(255, 105, 0, 0.5)",
             });
           });
           flag = true;

@@ -187,7 +187,12 @@ const cdn77: cdncompany = {
     return getHeader(details, "X-77-Pop") ?? "";
   },
   shortPop(pop: string): string {
-    return pop.slice(0, 4);
+    const upper = pop
+      .split('')
+      .filter((c) => {
+        return 'A' <= c && c <= 'Z';
+      }).join('');
+    return upper;
   },
   icon: () => {
     return cdn77_32;
@@ -265,6 +270,7 @@ const githubPages: cdncompany = {
   detect: (details) => {
     const server = getHeader(details, "server")?.toLowerCase();
     const fastlyRequestId = getHeader(details, "x-fastly-request-id");
+    const githubRequestId = getHeader(details, "x-github-request-id");
     const xTimer = getHeader(details, "x-timer") ?? "";
 
     const url = details.url;
@@ -272,6 +278,7 @@ const githubPages: cdncompany = {
 
     return ((server === "github.com") &&
         (fastlyRequestId !== undefined) &&
+        (githubRequestId !== undefined) &&
         fastlyRegex.test(xTimer)) ||
       (hostname.endsWith("github.io"));
   },
@@ -300,14 +307,15 @@ const isIPv6 = (address: string) => {
 import alibaba32 from "~/assets/type1/alibaba-cloud-32.png";
 
 const alibaba_const: any = {
-  via_regex: /v?cache[0-9]{1,3}\.[a-zA-Z0-9]{4,10}\[[^\]]+]/,
+  via_regex: /v?cache[0-9]{1,3}\.[a-zA-Z0-9\-]{4,10}\[[^\]]+]/,
 }
 
 // TODO, 需要靠HTTPS-DNS/firefox DNS 补全
 const alibaba: cdncompany = {
   detect: (details) => {
     const server = getHeader(details, "server");
-    const viaList = getHeader(details, "via")?.split(", ") ?? [];
+    const via = getHeader(details, "via");
+    const viaList = via?.split(", ") ?? [];
     const allMatch = viaList.every((cache) => {
       return alibaba_const.via_regex.test(cache) || isIPv6(cache);
     });
