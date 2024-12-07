@@ -1,0 +1,32 @@
+{
+  "US": [
+    {
+      "name": "Cloudflare",
+      "url": "https://cloudflare-dns.com/dns-query"
+    },
+    {
+      "name": "Google",
+      "url": "https://dns.google/dns-query"
+    },
+    {
+      "name": "Cisco DNS",
+      "url": "https://doh.opendns.com/dns-query"
+    }
+  ],
+  "CN": [
+    {
+      "name": "Alibaba Public DNS",
+      "url": "https://dns.alidns.com/dns-query"
+    },
+    {
+      "name": "Tencent DNSPod",
+      "url": "https://doh.pub/dns-query"
+    }
+  ],
+  "CNN": [
+    {
+      "name": "360",
+      "url": "https://doh.360.cn/dns-query"
+    }
+  ]
+}

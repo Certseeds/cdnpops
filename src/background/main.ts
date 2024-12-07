@@ -2,7 +2,6 @@ import {onMessage, sendMessage} from 'webext-bridge/background'
 import type {Tabs, WebRequest} from 'webextension-polyfill'
 import {type1, noone} from './rules'
 import {isFirefox} from '~/env'
-import {ColorValue} from "webextension-polyfill/namespaces/action";
 
 // only on dev mode
 if (import.meta.hot) {

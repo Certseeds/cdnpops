@@ -1,3 +1,6 @@
-import { useWebExtensionStorage } from '~/composables/useWebExtensionStorage'
+import {useWebExtensionStorage} from '~/composables/useWebExtensionStorage'
 
-export const storageDemo = useWebExtensionStorage('webext-demo', 'Storage Demo')
+export const doh_list_str = useWebExtensionStorage(
+  'Https Over DNS Address v1',
+  ''
+)
