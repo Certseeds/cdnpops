@@ -14,8 +14,8 @@ if (typeof browser !== "undefined" && browser.runtime?.onInstalled) {
 
 import { type1, noone } from './rules';
 import type { cdncompany } from './rules';
-function onRequest(details) {
-  console.log(details);
+import { detectCdnByCname } from './dns.ff';
+async function onRequest(details) {
   const tabId = details.tabId;
   if (tabId == -1) {
     return;
@@ -31,26 +31,15 @@ function onRequest(details) {
     }
   }
   if (find_detector === undefined) {
+    // 这里是调用dns.ff.ts中的函数
+    find_detector = await detectCdnByCname(new URL(details.url).hostname);
+    console.log(find_detector.name());
+  }
+  if (find_detector === undefined) {
     find_detector = noone;
+    console.log(find_detector.name());
   }
   updateBadge(tabId, find_detector.icon(), find_detector.name(), find_detector.pop(details));
-  // 接下来大概是添加一些规则判断函数, 然后添加chrome的DOH函数, 以及firefox的dns调用函数.
-  // else {
-  //   let hostname = new URL(details.url).hostname;
-  //   browser.dns.resolve(hostname, ['canonical_name']).then(resp => {
-  //     let canonicalName = resp['canonicalName'];
-  //     console.log(`Resolved ${hostname} to CNAME ${canonicalName}`);
-
-  //     for (const detector of cnameDetectors) {
-  //       for (const domain of detector.domains) {
-  //         if (canonicalName.endsWith(domain)) {
-  //           updateBadge(tabId, detector.slug, detector.name, null);
-  //           return;
-  //         }
-  //       }
-  //     }
-  //   });
-  // }
 }
 
 function updateBadge(tabId, cdnIcon, cdnName, pop) {
