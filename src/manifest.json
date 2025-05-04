@@ -26,7 +26,7 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "some-unique-id@example.com",
+      "id": "cdnpop@addon.certseeds.com",
       "strict_min_version": "109.0"
     }
   }
